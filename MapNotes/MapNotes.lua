@@ -23,7 +23,6 @@ function MapNotes_SlashHandler(msgbase)
 		--function MapNotes:AddNoteToMap(continent, zoneid, posx, posy, id, icon, tooltip_function)
 		--MapNotes:AddNoteToMap(2,12,0.5,0.5, 10,"complete",function() 	MapNotes:debug_Print("test: "..tostring(this.data.customData)); end);
 		MapNotes:RegisterAddon("TestAddon", MapNotes);
-		MapNotes:DRAW_NOTES();
 	elseif(msgbase == "draw") then
 		MapNotes:DRAW_NOTES();
 	elseif(msgbase == "frames") then
@@ -35,6 +34,8 @@ function MapNotes_SlashHandler(msgbase)
 	end
 
 end
+
+--GetNodes Example
 function MapNotes:GetNodes(continent, zone)
 	Notes = {};
 
@@ -44,8 +45,9 @@ function MapNotes:GetNodes(continent, zone)
 	Note.y = 0.5;
 	Note.zoneid = 12;
 	Note.continent = 2;
-	Note.icon = "complete";
+	Note.icon = Icons["complete"].path;
 	Note.Tooltip = function() 	MapNotes:debug_Print("test: "..tostring(this.data.customData)); end;
+	Note.Click = function() DEFAULT_CHAT_FRAME:AddMessage("Clicky") end;
 	Note.customData = 10;
 	--Inserts it into the right zone and continent for later use.
 	table.insert(Notes, Note);
@@ -152,9 +154,8 @@ end
 --2 / 12
 
 --Checks first if there are any notes for the current zone, then draws the desired icon
-function MapNotes:DRAW_NOTES()
+function MapNotes:DRAW_NOTES(Name, Addon)
 	local c, z = GetCurrentMapContinent(), GetCurrentMapZone();
-	for Name, Addon in pairs(Registered_Addons) do
 		MapNotes:debug_Print("DRAWING ADDON: "..Name);
 		for k, v in pairs(Addon:GetNodes(c, z)) do
 			if true then
@@ -164,8 +165,13 @@ function MapNotes:DRAW_NOTES()
 				Icon:SetParent(WorldMapFrame);
 				Icon:SetPoint("CENTER",0,0)
 				Icon.type = "WorldMapNote";
-				Icon:SetScript("OnEnter", v.Tooltip); --Script Toolip
-				Icon:SetScript("OnLeave", function() if(WorldMapTooltip) then WorldMapTooltip:Hide() end if(GameTooltip) then GameTooltip:Hide() end end) --Script Exit Tooltip
+				if(v.Tooltip) then
+					Icon:SetScript("OnEnter", v.Tooltip); --Script Toolip
+					Icon:SetScript("OnLeave", function() if(WorldMapTooltip) then WorldMapTooltip:Hide() end if(GameTooltip) then GameTooltip:Hide() end end) --Script Exit Tooltip
+				end
+				if(v.Click) then
+					Icon:SetScript("OnClick", v.Click);
+				end
 				
 				if(z == 0 and c == 0) then--Both continents
 					Icon:SetWidth(16*NOTES_WORLD_MAP_ICON_SCALE)  -- Set These to whatever height/width is needed 
@@ -179,8 +185,10 @@ function MapNotes:DRAW_NOTES()
 				end
 
 				--Set the texture to the right type
-				Icon.texture:SetTexture(Icons[v.icon].path);
+				Icon.texture:SetTexture(v.icon);
+				Icon:SetHighlightTexture(v.icon, "ADD");
 				Icon.texture:SetAllPoints(Icon)
+				Icon:SetFrameLevel(11);
 
 				--Shows and then calls Astrolabe to place it on the map.
 				Icon:Show();
@@ -205,9 +213,9 @@ function MapNotes:DRAW_NOTES()
 				MMIcon:SetHeight(16*NOTES_MINIMAP_ICON_SCALE) -- for your Texture
 				MMIcon.type = "MiniMapNote";
 				--Sets highlight texture (Nothing stops us from doing this on the worldmap aswell)
-				MMIcon:SetHighlightTexture(Icons[v.icon].path, "ADD");
+				MMIcon:SetHighlightTexture(v.icon, "ADD");
 				--Set the texture to the right type
-				MMIcon.texture:SetTexture(Icons[v.icon].path);
+				MMIcon.texture:SetTexture(v.icon);
 				MMIcon.texture:SetAllPoints(MMIcon)
 				--Shows and then calls Astrolabe to place it on the map.
 				--MMIcon:Show();
@@ -217,7 +225,6 @@ function MapNotes:DRAW_NOTES()
 				table.insert(UsedNoteFrames, MMIcon);
 			end
 		end
-	end
 end
 
 --Debug print function
@@ -294,7 +301,9 @@ function MapNotes:Update()
 	local c, z = GetCurrentMapContinent(), GetCurrentMapZone();
 	if(c ~= lastC or z ~= lastZ) then
 		MapNotes:CLEAR_ALL_NOTES();
-		MapNotes:DRAW_NOTES();
+		for Name, Addon in pairs(Registered_Addons) do
+			MapNotes:DRAW_NOTES(Name, Addon);
+		end
 		lastC = c;
 		lastZ = z;
 	end
