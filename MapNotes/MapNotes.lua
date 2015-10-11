@@ -16,11 +16,12 @@ NOTES_MINIMAP_ICON_SCALE = 1.0;
 local Registered_Addons = {};
 
 
+--DEBUG CODE!
 function MapNotes_SlashHandler(msgbase)
 
 	if(msgbase=="test") then
 		--function MapNotes:AddNoteToMap(continent, zoneid, posx, posy, id, icon, tooltip_function)
-		--MapNotes:AddNoteToMap(2,12,0.5,0.5, 10,"complete",function() 	DEFAULT_CHAT_FRAME:AddMessage("test: "..tostring(this.data.customData)); end);
+		--MapNotes:AddNoteToMap(2,12,0.5,0.5, 10,"complete",function() 	MapNotes:debug_Print("test: "..tostring(this.data.customData)); end);
 		MapNotes:RegisterAddon("TestAddon", MapNotes);
 		MapNotes:DRAW_NOTES();
 	elseif(msgbase == "draw") then
@@ -30,11 +31,10 @@ function MapNotes_SlashHandler(msgbase)
 			MapNotes:debug_Print(AllFrames[i]:GetName());
 		end
 	else
-		DEFAULT_CHAT_FRAME:AddMessage("No such command");
+		MapNotes:debug_Print("No such command");
 	end
 
 end
---DEBUG CODE!
 function MapNotes:GetNodes(continent, zone)
 	Notes = {};
 
@@ -45,19 +45,24 @@ function MapNotes:GetNodes(continent, zone)
 	Note.zoneid = 12;
 	Note.continent = 2;
 	Note.icon = "complete";
-	Note.Tooltip = function() 	DEFAULT_CHAT_FRAME:AddMessage("test: "..tostring(this.data.customData)); end;
+	Note.Tooltip = function() 	MapNotes:debug_Print("test: "..tostring(this.data.customData)); end;
 	Note.customData = 10;
 	--Inserts it into the right zone and continent for later use.
 	table.insert(Notes, Note);
 	return Notes;
 end
+--DEBUG CODE END!
+
+
 
 function MapNotes:RegisterAddon(name, Addon)
-	DEFAULT_CHAT_FRAME:AddMessage("Registering addon");
-	table.insert(Registered_Addons, Addon);
-	for k, v in pairs(Registered_Addons) do
-		for k1, v1 in pairs(v) do
-			--DEFAULT_CHAT_FRAME:AddMessage(k1.." "..tostring(v1))
+	if(Addon) then
+		MapNotes:debug_Print("Registering addon : "..tostring(name));
+		Registered_Addons[name] = Addon;
+		for k, v in pairs(Registered_Addons) do
+			for k1, v1 in pairs(v) do
+				--MapNotes:debug_Print(k1.." "..tostring(v1))
+			end
 		end
 	end
 end
@@ -144,35 +149,13 @@ function MapNotes:CLEAR_ALL_NOTES()
 end
 
 
---[[MapNotes = {};
-function MapNotes:AddNoteToMap(continent, zoneid, posx, posy, customData, icon, tooltip_function)
-	--This is to set up the variables
-	if(MapNotes[continent] == nil) then
-		MapNotes[continent] = {};
-	end
-	if(MapNotes[continent][zoneid] == nil) then
-		MapNotes[continent][zoneid] = {};
-	end
-
-	--Sets values that i want to use for the notes THIS IS WIP MORE INFO MAY BE NEDED BOTH IN PARAMETERS AND NOTES!!!
-	Note = {};
-	Note.x = posx;
-	Note.y = posy;
-	Note.zoneid = zoneid;
-	Note.continent = continent;
-	Note.icon = icon;
-	Note.Tooltip = tooltip_function;
-	Note.customData = customData;
-	--Inserts it into the right zone and continent for later use.
-	table.insert(MapNotes[continent][zoneid], Note);
-end]]--
-
 --2 / 12
 
 --Checks first if there are any notes for the current zone, then draws the desired icon
 function MapNotes:DRAW_NOTES()
 	local c, z = GetCurrentMapContinent(), GetCurrentMapZone();
-	for index, Addon in pairs(Registered_Addons) do
+	for Name, Addon in pairs(Registered_Addons) do
+		MapNotes:debug_Print("DRAWING ADDON: "..Name);
 		for k, v in pairs(Addon:GetNodes(c, z)) do
 			if true then
 				Icon = MapNotes:GetBlankNoteFrame();

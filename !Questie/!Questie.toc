@@ -3,7 +3,7 @@
 ## Author: Aero/Schaka/Logonz/everyone else
 ## Notes: A standalone Vanilla QuestHelper
 ## Version: 2.0.13 BETA
-## RequiredDeps:
+## RequiredDeps: MapNotes
 ## OptionalDeps: 
 ## SavedVariables: QuestieTrackerVariables, QuestieDebug, QuestieConfig
 ## SavedVariablesPerCharacter: QuestieSeenQuests, QuestieTrackedQuests

@@ -1,5 +1,5 @@
 ## Interface: 11200
-## Title: |cFFFFFFFFMap Notes|r|cFF00FF00 v0.1|r|cFFFF0000 ALPHA|r
+## Title: Map Notes
 ## Author: Aero/Schaka/Logon/everyone else
 ## Notes: Provides an Map Note API
 ## Version: 0.1v
